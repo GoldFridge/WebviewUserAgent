@@ -86,6 +86,9 @@ type WebView interface {
 	// thread.
 	SetTitle(title string)
 
+	// SetUserAgent updates the UserAgent
+	SetUserAgent(agent string)
+
 	// SetSize updates native window size. See Hint constants.
 	SetSize(w int, h int, hint Hint)
 
@@ -194,6 +197,13 @@ func (w *webview) SetTitle(title string) {
 
 func (w *webview) SetSize(width int, height int, hint Hint) {
 	C.webview_set_size(w.w, C.int(width), C.int(height), C.webview_hint_t(hint))
+}
+
+func (w *webview) SetUserAgent(agent string) {
+	//	fmt.Println(agent)
+	s := C.CString(agent)
+	defer C.free(unsafe.Pointer(s))
+	C.webview_set_user_agent(w.w, s)
 }
 
 func (w *webview) Init(js string) {
