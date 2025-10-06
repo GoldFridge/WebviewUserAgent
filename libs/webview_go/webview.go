@@ -27,6 +27,7 @@ import "C"
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	_ "github.com/webview/webview_go/libs/mswebview2"
 	_ "github.com/webview/webview_go/libs/mswebview2/include"
 	_ "github.com/webview/webview_go/libs/webview"
@@ -200,7 +201,7 @@ func (w *webview) SetSize(width int, height int, hint Hint) {
 }
 
 func (w *webview) SetUserAgent(agent string) {
-	//	fmt.Println(agent)
+	fmt.Println(agent)
 	s := C.CString(agent)
 	defer C.free(unsafe.Pointer(s))
 	C.webview_set_user_agent(w.w, s)
