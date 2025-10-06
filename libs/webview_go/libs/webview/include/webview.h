@@ -25,6 +25,7 @@
 
 /// @file webview.h
 
+
 #ifndef WEBVIEW_H
 #define WEBVIEW_H
 
@@ -352,6 +353,15 @@ WEBVIEW_API void webview_unbind(webview_t w, const char *name);
  */
 WEBVIEW_API void webview_return(webview_t w, const char *seq, int status,
                                 const char *result);
+
+/**
+ * Set user agent
+ *
+ * @param w The webview instance.
+ * @param agent A null-terminated C string representing the new User-Agent.
+ */
+WEBVIEW_API void webview_set_user_agent(webview_t w, const char *agent);
+
 
 /**
  * Get the library's version information.
@@ -1007,6 +1017,9 @@ if (status === 0) {\
   }
 
   void set_html(const std::string &html) { set_html_impl(html); }
+
+  void set_user_agent(const std::string &agent) { set_user_agent_impl(agent); }
+
   void init(const std::string &js) { init_impl(js); }
   void eval(const std::string &js) { eval_impl(js); }
 
@@ -1021,6 +1034,7 @@ protected:
   virtual void set_title_impl(const std::string &title) = 0;
   virtual void set_size_impl(int width, int height, webview_hint_t hints) = 0;
   virtual void set_html_impl(const std::string &html) = 0;
+  virtual void set_user_agent_impl(const std::string &agent) = 0;
   virtual void init_impl(const std::string &js) = 0;
   virtual void eval_impl(const std::string &js) = 0;
 
@@ -1333,6 +1347,10 @@ public:
 
   void set_title_impl(const std::string &title) override {
     gtk_window_set_title(GTK_WINDOW(m_window), title.c_str());
+  }
+
+  void set_user_agent_impl(const std::string &agent) override {
+    // Not yet implemented
   }
 
   void set_size_impl(int width, int height, webview_hint_t hints) override {
@@ -1654,6 +1672,10 @@ public:
                          objc::msg_send<id>("NSString"_cls,
                                             "stringWithUTF8String:"_sel,
                                             title.c_str()));
+  }
+
+  void set_user_agent_impl(const std::string &agent) override {
+    //Not Implemented
   }
   void set_size_impl(int width, int height, webview_hint_t hints) override {
     objc::autoreleasepool arp;
@@ -3263,6 +3285,16 @@ public:
     SetWindowTextW(m_window, widen_string(title).c_str());
   }
 
+  void set_user_agent_impl(const std::string &agent) override {
+    ICoreWebView2Settings *settings = nullptr;
+    m_webview->get_Settings(&settings);
+    ICoreWebView2Settings2 *settings2 = nullptr;
+    settings->QueryInterface(IID_ICoreWebView2Settings2,
+                             reinterpret_cast<void **>(&settings2));
+    settings2->put_UserAgent(widen_string(agent).c_str());
+    settings2->Release();
+  }
+
   void set_size_impl(int width, int height, webview_hint_t hints) override {
     auto style = GetWindowLong(m_window, GWL_STYLE);
     if (hints == WEBVIEW_HINT_FIXED) {
@@ -3547,6 +3579,10 @@ WEBVIEW_API void webview_set_title(webview_t w, const char *title) {
   static_cast<webview::webview *>(w)->set_title(title);
 }
 
+WEBVIEW_API void webview_set_user_agent(webview_t w, const char *agent) {
+  static_cast<webview::webview *>(w)->set_user_agent(agent);
+}
+
 WEBVIEW_API void webview_set_size(webview_t w, int width, int height,
                                   webview_hint_t hints) {
   static_cast<webview::webview *>(w)->set_size(width, height, hints);
@@ -3587,6 +3623,7 @@ WEBVIEW_API void webview_unbind(webview_t w, const char *name) {
 WEBVIEW_API void webview_return(webview_t w, const char *seq, int status,
                                 const char *result) {
   static_cast<webview::webview *>(w)->resolve(seq, status, result);
+}
 }
 
 WEBVIEW_API const webview_version_info_t *webview_version(void) {
