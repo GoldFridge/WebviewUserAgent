@@ -3,4 +3,4 @@ module WebviewUserAgent
 go 1.25.0
 
 require github.com/webview/webview_go v0.0.0-20240831120633-6173450d4dd6 // indirect
-replace github.com/webview/webview_go => ../WebViewLibrary/libs/webview_go
+replace github.com/webview/webview_go => ../WebviewUserAgent/libs/webview_go
