@@ -1350,7 +1350,8 @@ public:
   }
 
   void set_user_agent_impl(const std::string &agent) override {
-    // Not yet implemented
+    webkit_settings_set_user_agent(settings, agent.c_str());
+    webkit_web_view_set_settings(WEBKIT_WEB_VIEW(m_webview), settings);
   }
 
   void set_size_impl(int width, int height, webview_hint_t hints) override {
@@ -1675,8 +1676,15 @@ public:
   }
 
   void set_user_agent_impl(const std::string &agent) override {
-    //Not Implemented
+    objc::autoreleasepool arp;
+    id nsAgent = objc::msg_send<id>("NSString"_cls,
+                                        "stringWithUTF8String:"_sel,
+                                        agent.c_str());
+    objc::msg_send<void>(m_webview,
+                             "setCustomUserAgent:"_sel,
+                             nsAgent);
   }
+
   void set_size_impl(int width, int height, webview_hint_t hints) override {
     objc::autoreleasepool arp;
 
@@ -3623,7 +3631,6 @@ WEBVIEW_API void webview_unbind(webview_t w, const char *name) {
 WEBVIEW_API void webview_return(webview_t w, const char *seq, int status,
                                 const char *result) {
   static_cast<webview::webview *>(w)->resolve(seq, status, result);
-}
 }
 
 WEBVIEW_API const webview_version_info_t *webview_version(void) {
