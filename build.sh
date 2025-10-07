@@ -28,7 +28,7 @@ echo "Tidying Go modules..."
 go mod tidy
 
 echo "Building executable..."
-go build -o webview_useragent ./cmd/main.go 2>/dev/null || go build -o webview_useragent .
+go build -o webview_useragent ./cmd/app/main.go 2>/dev/null || go build -o webview_useragent .
 
 echo "Build complete: ./webview_useragent"
 
